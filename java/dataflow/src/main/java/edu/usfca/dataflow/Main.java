@@ -15,9 +15,9 @@ import edu.usfca.dataflow.utils.BqUtils;
  */
 public class Main {
   // TODO: Make sure you change USER_EMAIL below to your @dons email address.
-  final private static String USER_EMAIL = "a";
+  final private static String USER_EMAIL = "hmulabagula@dons.usfca.edu";
   // TODO: Make sure you change GCP_PROJECT to your project id.
-  final public static String GCP_PROJECT = "b";
+  final public static String GCP_PROJECT = "cs-686-lab06";
 
   static String getUserEmail() {
     return USER_EMAIL;
