@@ -2,7 +2,7 @@
 CREATE TEMP FUNCTION parseRequest(request STRING)
 RETURNS STRUCT<uuid STRING, os STRING, event_id STRING, amount FLOAT64, store STRING, bundle STRING>
 LANGUAGE js AS """
-   var queryParams =request.split("?");
+  var queryParams =request.split("?");
   var queries = queryParams[1].split("&");
   let paramsMap = new Map();
   for(i = 0 ; i < queries.length; i ++){
@@ -22,11 +22,26 @@ LANGUAGE js AS """
   return this;
 
 """;
+CREATE TEMP FUNCTION
+  urldecode(url string) AS ((
+    SELECT
+      SAFE_CONVERT_BYTES_TO_STRING( ARRAY_TO_STRING(ARRAY_AGG(
+          IF
+            (STARTS_WITH(y, '%'),
+              FROM_HEX(SUBSTR(y, 2)),
+              CAST(y AS BYTES))
+          ORDER BY
+            i ), b''))
+    FROM
+      UNNEST(REGEXP_EXTRACT_ALL(url, r"%[0-9a-fA-F]{2}|[^%]+")) AS y
+    WITH
+    OFFSET
+      AS i ));
 
 with httpResults as
 (SELECT httpRequest.*, timestamp FROM `cs-686-lab06.loadBalancerLogs.loadBalancerLogs_small`),
 
- parsedTable as (select parseRequest(requestUrl) as request, timestamp as time from httpResults)
+ parsedTable as (select parseRequest(urldecode(requestUrl)) as request, timestamp as time from httpResults)
 
 Select * from (
 select bundle, count(distinct(id)) as distinct_ids, ANY_VALUE(purchases) as total_amount from (
