@@ -29,7 +29,7 @@ with httpResults as
  parsedTable as (select parseRequest(requestUrl) as request, timestamp as time from httpResults)
 
 Select * from (
-select bundle, ANY_VALUE(purchases) as total_amount, count(distinct(id)) as distinct_ids from (
+select bundle, count(distinct(id)) as distinct_ids, ANY_VALUE(purchases) as total_amount from (
 SELECT request.uuid as id, request.os, request.event_id, SUM(request.amount) OVER(partition by request.bundle) as purchases
 , request.store, request.bundle as bundle FROM parsedTable )
 group by 1
